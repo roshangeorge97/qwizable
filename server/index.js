@@ -80,6 +80,7 @@ app.post('/api/transcribe', upload.single('file'), async (req, res) => {
     console.error('No audio file provided');
     return res.status(400).json({ error: 'No audio file provided' });
   }
+  console.log('File received:', req.file);
 
   const inputPath = req.file.path;
   const outputPath = path.join('uploads', `${req.file.filename}.mp3`);
@@ -118,11 +119,13 @@ app.post('/api/transcribe', upload.single('file'), async (req, res) => {
     
     fs.unlinkSync(inputPath);
     fs.unlinkSync(outputPath);
-
+    console.log('Raw transcription result:', response);
+    console.log('Transcription successful:', transcription);
     return res.json({ transcription: transcription });
+
   } catch (error) {
     console.error('Error transcribing audio:', error);
-    return res.status(500).json({ error: 'Error transcribing audio' });
+    return res.status(500).json({ error: 'Error transcribing audio', details: error.message });
   }
 });
 

@@ -33,8 +33,7 @@ const QuizGenerator = () => {
         ],
         model: "gpt-3.5-turbo",
       });
-
-      // Extract the JSON from the completion response
+      
       const completionText = completion.choices[0].message.content;
       const jsonStartIndex = completionText.indexOf('{');
       const jsonEndIndex = completionText.lastIndexOf('}') + 1;
@@ -80,16 +79,19 @@ const QuizGenerator = () => {
   const stopRecording = () => {
     console.log('Stopping recording...');
     if (mediaRecorderRef.current && recording) {
-      mediaRecorderRef.current.stop();
-      setRecording(false);
       return new Promise((resolve) => {
         mediaRecorderRef.current.onstop = () => {
           console.log('Recording stopped, chunks:', audioChunksRef.current.length);
           resolve();
         };
+        mediaRecorderRef.current.stop();
+        setRecording(false);
       });
     }
+    return Promise.resolve();
   };
+
+
   const sendAudioToServer = async () => {
     console.log('Sending audio to server...');
     if (audioChunksRef.current.length === 0) {
@@ -139,24 +141,27 @@ const QuizGenerator = () => {
     }
   }, []);
 
-  const handleAnswer = (answerText) => {
-    console.log('Handling answer:', answerText);
-    if (quiz && quiz[currentQuestionIndex]) {
-      const currentQuestion = quiz[currentQuestionIndex];
-      const answerIndex = currentQuestion.options.findIndex(
-        option => option.toLowerCase().includes(answerText.toLowerCase())
-      );
-      if (answerIndex !== -1) {
-        setUserAnswers(prevAnswers => {
-          const newAnswers = [...prevAnswers];
-          newAnswers[currentQuestionIndex] = answerIndex;
-          return newAnswers;
-        });
-      } else {
-        console.log('Answer not found in options');
-      }
+const handleAnswer = (answerText) => {
+  console.log('Handling answer:', answerText);
+  if (quiz && quiz[currentQuestionIndex]) {
+    const currentQuestion = quiz[currentQuestionIndex];
+    const answerIndex = currentQuestion.options.findIndex(
+      option => option.toLowerCase().includes(answerText.toLowerCase()) || 
+                answerText.toLowerCase().includes(option.toLowerCase())
+    );
+    if (answerIndex !== -1) {
+      console.log('Answer found:', currentQuestion.options[answerIndex]);
+      setUserAnswers(prevAnswers => {
+        const newAnswers = [...prevAnswers];
+        newAnswers[currentQuestionIndex] = answerIndex;
+        return newAnswers;
+      });
+    } else {
+      console.log('Answer not found in options. Transcribed text:', answerText);
+      console.log('Available options:', currentQuestion.options);
     }
-  };
+  }
+};
   
   const [quizSubmitted, setQuizSubmitted] = useState(false);
 

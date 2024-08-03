@@ -55,8 +55,12 @@ const Quiz = ({
     console.log('Finished Answering clicked');
     if (answeringEnabled && !isSpeaking && !isProcessing) {
       setAnsweringEnabled(false);
-      await stopRecording();
-      await sendAudioToServer();
+      try {
+        await stopRecording();
+        await sendAudioToServer();
+      } catch (error) {
+        console.error('Error processing answer:', error);
+      }
       setButtonsEnabled(false);
     }
   };
