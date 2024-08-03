@@ -11,7 +11,7 @@ const QuizGenerator = () => {
     setLoading(true);
     try {
       const openai = new OpenAI({
-        apiKey: import.meta.env.VITE_OPENAI_API_KEY,
+        apiKey: import.meta.env.VITE_OPENAI_API_KEY, dangerouslyAllowBrowser: true
       });
 
       const completion = await openai.chat.completions.create({
