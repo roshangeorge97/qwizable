@@ -33,7 +33,7 @@ const QuizGenerator = () => {
         ],
         model: "gpt-3.5-turbo",
       });
-      
+
       const completionText = completion.choices[0].message.content;
       const jsonStartIndex = completionText.indexOf('{');
       const jsonEndIndex = completionText.lastIndexOf('}') + 1;
@@ -91,7 +91,6 @@ const QuizGenerator = () => {
     return Promise.resolve();
   };
 
-
   const sendAudioToServer = async () => {
     console.log('Sending audio to server...');
     if (audioChunksRef.current.length === 0) {
@@ -99,30 +98,30 @@ const QuizGenerator = () => {
       alert('No audio data captured. Please try recording again.');
       return;
     }
-  
+
     const audioBlob = new Blob(audioChunksRef.current, { type: 'audio/webm' });
     const formData = new FormData();
     formData.append('file', audioBlob, 'audio.webm');
-  
+
     setIsProcessing(true);
-  
+
     try {
       const response = await fetch('http://localhost:3001/api/transcribe', {
         method: 'POST',
         body: formData,
       });
-  
+
       if (!response.ok) {
         throw new Error('Server response was not ok');
       }
-  
+
       const data = await response.json();
       handleAnswer(data.transcription);
     } catch (error) {
       console.error('Error sending audio to server:', error);
       alert('Error transcribing audio. Please try again.');
     }
-  
+
     setIsProcessing(false);
   };
 
@@ -141,28 +140,28 @@ const QuizGenerator = () => {
     }
   }, []);
 
-const handleAnswer = (answerText) => {
-  console.log('Handling answer:', answerText);
-  if (quiz && quiz[currentQuestionIndex]) {
-    const currentQuestion = quiz[currentQuestionIndex];
-    const answerIndex = currentQuestion.options.findIndex(
-      option => option.toLowerCase().includes(answerText.toLowerCase()) || 
-                answerText.toLowerCase().includes(option.toLowerCase())
-    );
-    if (answerIndex !== -1) {
-      console.log('Answer found:', currentQuestion.options[answerIndex]);
-      setUserAnswers(prevAnswers => {
-        const newAnswers = [...prevAnswers];
-        newAnswers[currentQuestionIndex] = answerIndex;
-        return newAnswers;
-      });
-    } else {
-      console.log('Answer not found in options. Transcribed text:', answerText);
-      console.log('Available options:', currentQuestion.options);
+  const handleAnswer = (answerText) => {
+    console.log('Handling answer:', answerText);
+    if (quiz && quiz[currentQuestionIndex]) {
+      const currentQuestion = quiz[currentQuestionIndex];
+      const answerIndex = currentQuestion.options.findIndex(
+        option => option.toLowerCase().includes(answerText.toLowerCase()) ||
+          answerText.toLowerCase().includes(option.toLowerCase())
+      );
+      if (answerIndex !== -1) {
+        console.log('Answer found:', currentQuestion.options[answerIndex]);
+        setUserAnswers(prevAnswers => {
+          const newAnswers = [...prevAnswers];
+          newAnswers[currentQuestionIndex] = answerIndex;
+          return newAnswers;
+        });
+      } else {
+        console.log('Answer not found in options. Transcribed text:', answerText);
+        console.log('Available options:', currentQuestion.options);
+      }
     }
-  }
-};
-  
+  };
+
   const [quizSubmitted, setQuizSubmitted] = useState(false);
 
   const handleNextQuestion = useCallback(() => {
@@ -223,14 +222,14 @@ const handleAnswer = (answerText) => {
           isProcessing={isProcessing}
         />
       )}
-{showResults && (
-  <QuizResult 
-    questions={quiz} 
-    userAnswers={userAnswers} 
-    speakText={speakText} 
-    onRestart={resetQuiz}
-  />
-)}
+      {showResults && (
+        <QuizResult
+          questions={quiz}
+          userAnswers={userAnswers}
+          speakText={speakText}
+          onRestart={resetQuiz}
+        />
+      )}
     </div>
   );
 };
