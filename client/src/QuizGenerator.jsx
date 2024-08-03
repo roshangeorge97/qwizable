@@ -3,7 +3,6 @@ import OpenAI from "openai";
 import Quiz from './Quiz';
 import QuizResult from './QuizResult';
 
-
 const QuizGenerator = () => {
   const [prompt, setPrompt] = useState('');
   const [quiz, setQuiz] = useState(null);
@@ -16,6 +15,7 @@ const QuizGenerator = () => {
   const [quizStarted, setQuizStarted] = useState(false);
   const [isSpeaking, setIsSpeaking] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
+  const [showResults, setShowResults] = useState(false);
 
   const generateQuiz = async () => {
     console.log('Generating quiz...');
@@ -58,14 +58,17 @@ const QuizGenerator = () => {
     try {
       console.log('Starting recording...');
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-      mediaRecorderRef.current = new MediaRecorder(stream);
+      mediaRecorderRef.current = new MediaRecorder(stream, { mimeType: 'audio/webm' });
       audioChunksRef.current = [];
 
       mediaRecorderRef.current.ondataavailable = (event) => {
         audioChunksRef.current.push(event.data);
       };
 
-      mediaRecorderRef.current.onstop = sendAudioToServer;
+      mediaRecorderRef.current.onstop = async () => {
+        const audioBlob = new Blob(audioChunksRef.current, { type: 'audio/webm' });
+        await sendAudioToServer(audioBlob);
+      };
 
       mediaRecorderRef.current.start();
       setRecording(true);
@@ -79,14 +82,25 @@ const QuizGenerator = () => {
     if (mediaRecorderRef.current && recording) {
       mediaRecorderRef.current.stop();
       setRecording(false);
+      return new Promise((resolve) => {
+        mediaRecorderRef.current.onstop = () => {
+          console.log('Recording stopped, chunks:', audioChunksRef.current.length);
+          resolve();
+        };
+      });
     }
   };
-
   const sendAudioToServer = async () => {
     console.log('Sending audio to server...');
-    const audioBlob = new Blob(audioChunksRef.current, { type: 'audio/mp3' });
+    if (audioChunksRef.current.length === 0) {
+      console.error('No audio data captured');
+      alert('No audio data captured. Please try recording again.');
+      return;
+    }
+  
+    const audioBlob = new Blob(audioChunksRef.current, { type: 'audio/webm' });
     const formData = new FormData();
-    formData.append('file', audioBlob, 'audio.mp3');
+    formData.append('file', audioBlob, 'audio.webm');
   
     setIsProcessing(true);
   
@@ -114,23 +128,9 @@ const QuizGenerator = () => {
     console.log('Speaking text:', text);
     try {
       setIsSpeaking(true);
-      const response = await fetch('http://localhost:3001/api/speak', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ text }),
-      });
-  
-      if (!response.ok) {
-        throw new Error('Server response was not ok');
-      }
-  
-      const audioBlob = await response.blob();
-      const audioUrl = URL.createObjectURL(audioBlob);
-      const audio = new Audio(audioUrl);
-      audio.onended = () => setIsSpeaking(false);
-      await audio.play();
+      const utterance = new SpeechSynthesisUtterance(text);
+      utterance.onend = () => setIsSpeaking(false);
+      speechSynthesis.speak(utterance);
     } catch (error) {
       console.error('Error in text-to-speech:', error);
       alert('Error in text-to-speech. Please try again.');
@@ -146,16 +146,38 @@ const QuizGenerator = () => {
       const answerIndex = currentQuestion.options.findIndex(
         option => option.toLowerCase().includes(answerText.toLowerCase())
       );
-      setUserAnswers([...userAnswers, answerIndex]);
+      if (answerIndex !== -1) {
+        setUserAnswers(prevAnswers => {
+          const newAnswers = [...prevAnswers];
+          newAnswers[currentQuestionIndex] = answerIndex;
+          return newAnswers;
+        });
+      } else {
+        console.log('Answer not found in options');
+      }
     }
   };
+  
+  const [quizSubmitted, setQuizSubmitted] = useState(false);
 
-  const handleNextQuestion = () => {
+  const handleNextQuestion = useCallback(() => {
     console.log('Moving to next question');
     if (quiz && currentQuestionIndex < quiz.length - 1) {
-      setCurrentQuestionIndex(currentQuestionIndex + 1);
+      setCurrentQuestionIndex(prevIndex => prevIndex + 1);
+    } else if (!quizSubmitted) {
+      setQuizSubmitted(true);
+      setShowResults(true);
     }
-  };
+  }, [quiz, currentQuestionIndex, quizSubmitted]);
+
+  // Reset function
+  const resetQuiz = useCallback(() => {
+    setQuizStarted(false);
+    setShowResults(false);
+    setCurrentQuestionIndex(0);
+    setUserAnswers([]);
+    setQuizSubmitted(false);
+  }, []);
 
   useEffect(() => {
     console.log('QuizGenerator component mounted');
@@ -168,7 +190,7 @@ const QuizGenerator = () => {
   return (
     <div>
       <h1>Quiz Generator</h1>
-      {!quizStarted && (
+      {!quizStarted && !showResults && (
         <>
           <input
             type="text"
@@ -196,9 +218,14 @@ const QuizGenerator = () => {
           isProcessing={isProcessing}
         />
       )}
-      {quiz && quizStarted && currentQuestionIndex === quiz.length && (
-        <QuizResult questions={quiz} userAnswers={userAnswers} speakText={speakText} />
-      )}
+{showResults && (
+  <QuizResult 
+    questions={quiz} 
+    userAnswers={userAnswers} 
+    speakText={speakText} 
+    onRestart={resetQuiz}
+  />
+)}
     </div>
   );
 };

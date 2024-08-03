@@ -10,6 +10,7 @@ const { OpenAI } = require('openai');
 require('dotenv').config();
 
 ffmpeg.setFfmpegPath(ffmpegInstaller.path);
+console.log('ffmpeg path:', ffmpegInstaller.path);
 
 const app = express();
 const upload = multer({ dest: 'uploads/' });
@@ -31,7 +32,7 @@ app.get('/', (req, res) => {
 });
 
 const MAX_RETRIES = 5;
-const DELAY_IN_MS = 20000; // 2 seconds in milliseconds
+const DELAY_IN_MS = 60000; 
 
 async function createSpeech(params) {
   let retryCount = 0;
@@ -86,20 +87,21 @@ app.post('/api/transcribe', upload.single('file'), async (req, res) => {
   try {
     await new Promise((resolve, reject) => {
       ffmpeg(inputPath)
-        .toFormat('mp3')
-        .on('error', (err) => reject(err))
-        .on('end', () => resolve())
-        .save(outputPath);
+      .inputFormat('webm')
+      .toFormat('mp3')
+      .on('error', (err) => {
+        console.error('ffmpeg error:', err);
+        reject(err);
+      })
+      .on('end', () => resolve())
+      .save(outputPath);
     });
 
-    // Read the audio file and convert to base64
     const audioBytes = fs.readFileSync(outputPath);
     const audioBase64 = audioBytes.toString('base64');
 
-    // Create the prompt for Gemini
     const prompt = "Generate a transcript of the speech.";
 
-    // Pass the prompt and the audio file to Gemini
     const result = await model.generateContent([
       prompt,
       {
@@ -114,7 +116,6 @@ app.post('/api/transcribe', upload.single('file'), async (req, res) => {
 
     console.log('Transcription successful:', transcription);
     
-    // Clean up files
     fs.unlinkSync(inputPath);
     fs.unlinkSync(outputPath);
 

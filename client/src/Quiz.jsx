@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useRef } from 'react';
+import React, { useEffect, useState, useRef, useCallback } from 'react';
 
 const Quiz = ({
   question,
@@ -18,6 +18,18 @@ const Quiz = ({
   const hasSpokenRef = useRef(false);
   const questionRef = useRef(null);
 
+  const speakQuestionOnce = useCallback(async () => {
+    if (!hasSpokenRef.current && questionRef.current === question) {
+      console.log('Speaking question:', questionIndex + 1);
+      hasSpokenRef.current = true;
+      const questionText = `Question ${questionIndex + 1} of ${totalQuestions}: ${question.question}. Options: ${question.options.join(', ')}`;
+      await speakText(questionText);
+      console.log('Finished speaking question:', questionIndex + 1);
+      setButtonsEnabled(true);
+      setAnsweringEnabled(true);
+    }
+  }, [question, questionIndex, totalQuestions, speakText]);
+
   useEffect(() => {
     console.log('Question effect triggered');
     setButtonsEnabled(false);
@@ -25,24 +37,12 @@ const Quiz = ({
     hasSpokenRef.current = false;
     questionRef.current = question;
 
-    const speakQuestionOnce = async () => {
-      if (!hasSpokenRef.current && questionRef.current === question) {
-        console.log('Speaking question:', questionIndex + 1);
-        hasSpokenRef.current = true;
-        const questionText = `Question ${questionIndex + 1} of ${totalQuestions}: ${question.question}. Options: ${question.options.join(', ')}`;
-        await speakText(questionText);
-        console.log('Finished speaking question:', questionIndex + 1);
-        setButtonsEnabled(true);
-        setAnsweringEnabled(true);
-      }
-    };
-
     speakQuestionOnce();
 
     return () => {
       console.log('Cleaning up question effect');
     };
-  }, [question, questionIndex, totalQuestions, speakText]);
+  }, [question, speakQuestionOnce]);
 
   const handleSayAnswer = () => {
     console.log('Say Answer clicked');
@@ -76,11 +76,18 @@ const Quiz = ({
       <button onClick={handleFinishedAnswering} disabled={!answeringEnabled || isSpeaking || isProcessing}>
         Finished Answering
       </button>
-      <button onClick={onNextQuestion} disabled={isSpeaking || isProcessing || answeringEnabled}>
-        {isProcessing ? 'Processing...' : isLastQuestion ? 'Finish Quiz' : 'Next Question'}
-      </button>
+      {!isLastQuestion && (
+        <button onClick={onNextQuestion} disabled={isSpeaking || isProcessing || answeringEnabled}>
+          {isProcessing ? 'Processing...' : 'Next Question'}
+        </button>
+      )}
+      {isLastQuestion && (
+        <button onClick={onNextQuestion} disabled={isSpeaking || isProcessing || answeringEnabled}>
+          {isProcessing ? 'Processing...' : 'Finish Quiz'}
+        </button>
+      )}
     </div>
   );
 };
 
-export default Quiz;
+export default React.memo(Quiz);
