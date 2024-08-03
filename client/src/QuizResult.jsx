@@ -1,10 +1,19 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 
-const QuizResult = ({ questions, userAnswers }) => {
+const QuizResult = ({ questions, userAnswers, speakText }) => {
   const score = userAnswers.reduce((total, answer, index) => {
     return total + (answer === questions[index].correctAnswer ? 1 : 0);
   }, 0);
 
+  useEffect(() => {
+    console.log('QuizResult component mounted');
+    const readResult = async () => {
+      console.log('Speaking quiz result...');
+      await speakText(`You have scored ${score} out of ${questions.length}`);
+      console.log('Finished speaking quiz result');
+    };
+    readResult();
+  }, []);
   return (
     <div>
       <h2>Quiz Results</h2>
