@@ -119,8 +119,6 @@ app.post('/api/transcribe', upload.single('file'), async (req, res) => {
     
     fs.unlinkSync(inputPath);
     fs.unlinkSync(outputPath);
-    console.log('Raw transcription result:', response);
-    console.log('Transcription successful:', transcription);
     return res.json({ transcription: transcription });
 
   } catch (error) {

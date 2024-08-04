@@ -8,6 +8,7 @@ const QuizGenerator = () => {
   const [quiz, setQuiz] = useState(null);
   const [loading, setLoading] = useState(false);
   const [recording, setRecording] = useState(false);
+  const [isAnsweringComplete, setIsAnsweringComplete] = useState(false); // New state
   const mediaRecorderRef = useRef(null);
   const audioChunksRef = useRef([]);
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
@@ -16,20 +17,38 @@ const QuizGenerator = () => {
   const [isSpeaking, setIsSpeaking] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
   const [showResults, setShowResults] = useState(false);
+  const [quizSubmitted, setQuizSubmitted] = useState(false);
+  const [isListeningForPrompt, setIsListeningForPrompt] = useState(false);
 
-  const generateQuiz = async () => {
-    console.log('Generating quiz...');
+  const startListeningForPrompt = async () => {
+    setIsListeningForPrompt(true);
+    await startRecording();
+  };
+
+  const stopListeningForPrompt = async () => {
+    setIsListeningForPrompt(false);
+    await stopRecording(true);  // Pass true to indicate it's for the prompt
+  };
+
+  const handlePromptTranscription = (transcription) => {
+    console.log('Transcribed prompt:', transcription);
+    setPrompt(transcription);
+    generateQuiz(transcription);  // Pass the transcription directly
+  };
+
+  const generateQuiz = async (quizPrompt) => {
+    console.log('Generating quiz for prompt:', quizPrompt);
     setLoading(true);
     try {
       const openai = new OpenAI({
         apiKey: import.meta.env.VITE_OPENAI_API_KEY,
         dangerouslyAllowBrowser: true
       });
-
+  
       const completion = await openai.chat.completions.create({
         messages: [
           { role: "system", content: "You are a helpful assistant that generates quizzes. Respond with a JSON object containing a 'questions' array." },
-          { role: "user", content: `Generate a 5-question quiz about ${prompt}. Each question should have a 'question' field, an 'options' array with 4 choices, and a 'correctAnswer' field with the index of the correct option.` }
+          { role: "user", content: `Generate a 5-question quiz about "${quizPrompt}". Each question should have a 'question' field, an 'options' array with 4 choices, and a 'correctAnswer' field with the index of the correct option.` }
         ],
         model: "gpt-3.5-turbo",
       });
@@ -38,7 +57,7 @@ const QuizGenerator = () => {
       const jsonStartIndex = completionText.indexOf('{');
       const jsonEndIndex = completionText.lastIndexOf('}') + 1;
       const jsonString = completionText.substring(jsonStartIndex, jsonEndIndex);
-
+  
       const quizData = JSON.parse(jsonString);
       setQuiz(quizData.questions);
       localStorage.setItem('quizQuestions', JSON.stringify(quizData.questions));
@@ -59,47 +78,55 @@ const QuizGenerator = () => {
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
       mediaRecorderRef.current = new MediaRecorder(stream, { mimeType: 'audio/webm' });
       audioChunksRef.current = [];
-
+  
       mediaRecorderRef.current.ondataavailable = (event) => {
-        audioChunksRef.current.push(event.data);
+        if (event.data.size > 0) {
+          audioChunksRef.current.push(event.data);
+        }
       };
-
-      mediaRecorderRef.current.onstop = async () => {
-        const audioBlob = new Blob(audioChunksRef.current, { type: 'audio/webm' });
-        await sendAudioToServer(audioBlob);
-      };
-
+  
       mediaRecorderRef.current.start();
       setRecording(true);
     } catch (error) {
       console.error('Error starting recording:', error);
+      alert('Error starting recording. Please check your microphone permissions.');
     }
   };
 
-  const stopRecording = () => {
-    console.log('Stopping recording...');
-    if (mediaRecorderRef.current && recording) {
-      return new Promise((resolve) => {
-        mediaRecorderRef.current.onstop = () => {
-          console.log('Recording stopped, chunks:', audioChunksRef.current.length);
-          resolve();
-        };
-        mediaRecorderRef.current.stop();
-        setRecording(false);
-      });
-    }
-    return Promise.resolve();
-  };
+const stopRecording = (isPrompt = false) => {
+  console.log('Stopping recording...');
+  if (mediaRecorderRef.current && recording) {
+    return new Promise((resolve) => {
+      mediaRecorderRef.current.onstop = async () => {
+        console.log('Recording stopped, chunks:', audioChunksRef.current.length);
+        if (audioChunksRef.current.length > 0) {
+          const audioBlob = new Blob(audioChunksRef.current, { type: 'audio/webm' });
+          await sendAudioToServer(audioBlob, isPrompt);
+          if (!isPrompt) {
+            setIsAnsweringComplete(true);
+          }
+        } else {
+          console.error('No audio data captured');
+          alert('No audio data captured. Please try recording again.');
+        }
+        audioChunksRef.current = [];
+        resolve();
+      };
+      mediaRecorderRef.current.stop();
+      setRecording(false);
+    });
+  }
+  return Promise.resolve();
+};
 
-  const sendAudioToServer = async () => {
+ const sendAudioToServer = async (audioBlob, isPrompt = false) => {
     console.log('Sending audio to server...');
-    if (audioChunksRef.current.length === 0) {
+    if (!audioBlob) {
       console.error('No audio data captured');
       alert('No audio data captured. Please try recording again.');
       return;
     }
 
-    const audioBlob = new Blob(audioChunksRef.current, { type: 'audio/webm' });
     const formData = new FormData();
     formData.append('file', audioBlob, 'audio.webm');
 
@@ -116,7 +143,11 @@ const QuizGenerator = () => {
       }
 
       const data = await response.json();
-      handleAnswer(data.transcription);
+      if (isPrompt) {
+        handlePromptTranscription(data.transcription);
+      } else {
+        handleAnswer(data.transcription);
+      }
     } catch (error) {
       console.error('Error sending audio to server:', error);
       alert('Error transcribing audio. Please try again.');
@@ -124,6 +155,7 @@ const QuizGenerator = () => {
 
     setIsProcessing(false);
   };
+
 
   const speakText = useCallback(async (text) => {
     console.log('Speaking text:', text);
@@ -162,17 +194,16 @@ const QuizGenerator = () => {
     }
   };
 
-  const [quizSubmitted, setQuizSubmitted] = useState(false);
-
   const handleNextQuestion = useCallback(() => {
     console.log('Moving to next question');
-    if (quiz && currentQuestionIndex < quiz.length - 1) {
+    if (isAnsweringComplete && quiz && currentQuestionIndex < quiz.length - 1) {
       setCurrentQuestionIndex(prevIndex => prevIndex + 1);
-    } else if (!quizSubmitted) {
+      setIsAnsweringComplete(false); // Reset answering complete status for the next question
+    } else if (isAnsweringComplete && !quizSubmitted) {
       setQuizSubmitted(true);
       setShowResults(true);
     }
-  }, [quiz, currentQuestionIndex, quizSubmitted]);
+  }, [quiz, currentQuestionIndex, quizSubmitted, isAnsweringComplete]);
 
   // Reset function
   const resetQuiz = useCallback(() => {
@@ -191,20 +222,43 @@ const QuizGenerator = () => {
     }
   }, []);
 
+  useEffect(() => {
+    const handleKeyDown = (event) => {
+      if (event.code === 'Space' && !recording) {
+        startRecording();
+      }
+    };
+
+    const handleKeyUp = (event) => {
+      if (event.code === 'Space' && recording) {
+        stopRecording();
+      }
+      if (event.code === 'Enter' && quizStarted && !showResults && isAnsweringComplete) {
+        handleNextQuestion();
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    window.addEventListener('keyup', handleKeyUp);
+
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown);
+      window.removeEventListener('keyup', handleKeyUp);
+    };
+  }, [recording, quizStarted, showResults, isAnsweringComplete, handleNextQuestion]);
+
   return (
     <div>
       <h1>Quiz Generator</h1>
       {!quizStarted && !showResults && (
         <>
-          <input
-            type="text"
-            value={prompt}
-            onChange={(e) => setPrompt(e.target.value)}
-            placeholder="Enter quiz topic"
-          />
-          <button onClick={generateQuiz} disabled={loading}>
-            {loading ? 'Generating...' : 'Generate Quiz'}
+          <button 
+            onClick={isListeningForPrompt ? stopListeningForPrompt : startListeningForPrompt}
+            disabled={loading}
+          >
+            {isListeningForPrompt ? 'Stop Recording' : 'Record Quiz Topic'}
           </button>
+          {prompt && <p>Quiz topic: {prompt}</p>}
         </>
       )}
       {quiz && quizStarted && currentQuestionIndex < quiz.length && (

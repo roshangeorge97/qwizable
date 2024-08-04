@@ -44,10 +44,14 @@ const Quiz = ({
     };
   }, [question, speakQuestionOnce]);
 
-  const handleSayAnswer = () => {
+  const handleSayAnswer = async () => {
     console.log('Say Answer clicked');
     if (buttonsEnabled && !isSpeaking && !isProcessing) {
-      startRecording();
+      try {
+        await startRecording();
+      } catch (error) {
+        console.error('Error starting recording:', error);
+      }
     }
   };
 
@@ -57,7 +61,6 @@ const Quiz = ({
       setAnsweringEnabled(false);
       try {
         await stopRecording();
-        await sendAudioToServer();
       } catch (error) {
         console.error('Error processing answer:', error);
       }
