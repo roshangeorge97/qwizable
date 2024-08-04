@@ -1,42 +1,169 @@
+body {
+  margin: 0;
+  padding: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  background-color: #f0f0f0;
+  font-family: Arial, sans-serif;
+  color: #000000;
+  font-size: 18px; /* Decreased base font size */
+  line-height: 1.6;
+}
+
 #root {
-  max-width: 1280px;
+  width: 100%;
+  max-width: 1200px;
   margin: 0 auto;
   padding: 2rem;
+  box-sizing: border-box;
+}
+
+.App {
+  background-color: white;
+  border-radius: 16px;
+  padding: 3rem;
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
   text-align: center;
 }
 
-.logo {
-  height: 6em;
-  padding: 1.5em;
-  will-change: filter;
-  transition: filter 300ms;
-}
-.logo:hover {
-  filter: drop-shadow(0 0 2em #646cffaa);
-}
-.logo.react:hover {
-  filter: drop-shadow(0 0 2em #61dafbaa);
+h1, h2 {
+  color: #000000;
+  margin-bottom: 1.5rem; /* Decreased margin */
+  font-size: 2.5rem; /* Smaller heading size */
 }
 
-@keyframes logo-spin {
-  from {
-    transform: rotate(0deg);
+button {
+  background-color: #4CAF50;
+  border: none;
+  color: white;
+  padding: 16px 32px; /* Decreased padding */
+  text-align: center;
+  text-decoration: none;
+  display: inline-block;
+  font-size: 20px; /* Smaller font size */
+  margin: 10px 5px; /* Decreased margin */
+  cursor: pointer;
+  border-radius: 8px; /* Less rounded corners */
+  transition: background-color 0.3s, transform 0.2s;
+  min-width: 150px; /* Decreased minimum width */
+}
+
+button:hover {
+  background-color: #45a049;
+  transform: scale(1.05);
+}
+
+button:focus {
+  outline: 4px solid #45a049;
+  outline-offset: 4px;
+}
+
+button:disabled {
+  background-color: #cccccc;
+  cursor: not-allowed;
+}
+
+ul {
+  list-style-type: none;
+  padding: 0;
+}
+
+li {
+  margin-bottom: 20px; /* Decreased margin for list items */
+  font-size: 20px; /* Smaller font size for list items */
+}
+
+.quiz-container, .result-container, .leaderboard-container {
+  background-color: #f9f9f9;
+  border-radius: 16px;
+  padding: 30px; /* Decreased padding */
+  margin-top: 30px; /* Decreased margin */
+  box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+}
+
+.nav-buttons {
+  margin-bottom: 30px; /* Decreased margin */
+}
+
+.nav-buttons button {
+  margin: 0 10px; /* Decreased margin between nav buttons */
+}
+
+.question-text {
+  font-weight: bold;
+  margin-bottom: 20px; /* Decreased margin */
+  font-size: 24px; /* Smaller font size for questions */
+}
+
+.options-list {
+  text-align: left;
+  margin: 0 auto;
+  width: fit-content;
+}
+
+.result-item {
+  margin-bottom: 30px; /* Decreased margin */
+  border-bottom: 2px solid #eee;
+  padding-bottom: 20px; /* Decreased padding */
+}
+
+.leaderboard-list {
+  text-align: left;
+  margin: 0 auto;
+  width: fit-content;
+}
+
+.leaderboard-item {
+  margin-bottom: 15px; /* Decreased margin */
+  font-size: 20px; /* Smaller font size for leaderboard items */
+}
+
+p {
+  font-size: 20px; /* Smaller font size for paragraphs */
+  line-height: 1.6;
+  margin-bottom: 20px; /* Decreased margin */
+}
+
+input[type="text"], input[type="email"], input[type="password"] {
+  font-size: 20px; /* Smaller font size for input fields */
+  padding: 15px; /* Decreased padding */
+  margin-bottom: 20px; /* Decreased margin */
+  width: 100%;
+  max-width: 500px;
+  border: 2px solid #ccc; /* Thinner border */
+  border-radius: 8px;
+}
+
+/* High contrast mode */
+@media (prefers-contrast: high) {
+  body {
+    background-color: #000000;
+    color: #ffffff;
   }
-  to {
-    transform: rotate(360deg);
+  
+  .App, .quiz-container.quiz-container, .result-container, .leaderboard-container {
+    background-color: #000000;
+    color: #ffffff;
+    border: 2px solid #ffffff;
   }
-}
 
-@media (prefers-reduced-motion: no-preference) {
-  a:nth-of-type(2) .logo {
-    animation: logo-spin infinite 20s linear;
+  
+  
+  button {
+    background-color: #ffffff;
+    color: #000000;
+    border: 2px solid #000000;
   }
-}
-
-.card {
-  padding: 2em;
-}
-
-.read-the-docs {
-  color: #888;
+  
+  button:hover {
+    background-color: #cccccc;
+  }
+  
+  input[type="text"], input[type="email"], input[type="password"] {
+    background-color: #000000;
+    color: #ffffff;
+    border-color: #ffffff;
+  }
 }

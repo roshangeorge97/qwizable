@@ -19,8 +19,8 @@ const Leaderboard = () => {
   }, []);
 
   return (
-    <div>
-      <h2>Leaderboard</h2>
+    <div className="leaderboard-container">
+      <h2 >Leaderboard</h2>
       <ol>
         {leaderboard.map(user => (
           <li key={user.id}>{user.email}: {user.totalPoints} points</li>

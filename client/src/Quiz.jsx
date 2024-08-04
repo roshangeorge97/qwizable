@@ -12,6 +12,7 @@ const Quiz = ({
   isLastQuestion,
   isSpeaking,
   isProcessing,
+  recording,
 }) => {
   const [buttonsEnabled, setButtonsEnabled] = useState(false);
   const [answeringEnabled, setAnsweringEnabled] = useState(false);
@@ -44,55 +45,35 @@ const Quiz = ({
     };
   }, [question, speakQuestionOnce]);
 
-  const handleSayAnswer = async () => {
-    console.log('Say Answer clicked');
-    if (buttonsEnabled && !isSpeaking && !isProcessing) {
-      try {
-        await startRecording();
-      } catch (error) {
-        console.error('Error starting recording:', error);
-      }
-    }
-  };
-
-  const handleFinishedAnswering = async () => {
-    console.log('Finished Answering clicked');
-    if (answeringEnabled && !isSpeaking && !isProcessing) {
-      setAnsweringEnabled(false);
-      try {
-        await stopRecording();
-      } catch (error) {
-        console.error('Error processing answer:', error);
-      }
-      setButtonsEnabled(false);
-    }
-  };
-
   return (
     <div>
       <h2>Question {questionIndex + 1} of {totalQuestions}</h2>
-      <p>{question.question}</p>
-      <ul>
+      <p className='question-text'>{question.question}</p>
+      <ul className='options-list'>
         {question.options.map((option, index) => (
           <li key={index}>{option}</li>
         ))}
       </ul>
-      <button onClick={handleSayAnswer} disabled={!buttonsEnabled || isSpeaking || isProcessing}>
-        Say Answer
-      </button>
-      <button onClick={handleFinishedAnswering} disabled={!answeringEnabled || isSpeaking || isProcessing}>
-        Finished Answering
+      <p>Hold Space to record your answer</p>
+      <button 
+        disabled={true}
+        style={{ backgroundColor: recording ? '#45a049' : '#4CAF50' }}
+      >
+        {recording ? 'Recording...' : 'Press Space to Record'}
       </button>
       {!isLastQuestion && (
-        <button onClick={onNextQuestion} disabled={isSpeaking || isProcessing || answeringEnabled}>
-          {isProcessing ? 'Processing...' : 'Next Question'}
-        </button>
+        <p>Press Enter for next question</p>
       )}
       {isLastQuestion && (
-        <button onClick={onNextQuestion} disabled={isSpeaking || isProcessing || answeringEnabled}>
-          {isProcessing ? 'Processing...' : 'Finish Quiz'}
-        </button>
+        <p>Press Enter to finish quiz</p>
       )}
+      <button 
+        onClick={onNextQuestion} 
+        disabled={isSpeaking || isProcessing || answeringEnabled || recording}
+        style={{ backgroundColor: (isSpeaking || isProcessing || answeringEnabled || recording) ? '#cccccc' : '#4CAF50' }}
+      >
+        {isProcessing ? 'Processing...' : isLastQuestion ? 'Finish Quiz' : 'Next Question'}
+      </button>
     </div>
   );
 };

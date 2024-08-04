@@ -21,6 +21,7 @@ const QuizGenerator = () => {
   const [isProcessing, setIsProcessing] = useState(false);
   const [showResults, setShowResults] = useState(false);
   const [quizSubmitted, setQuizSubmitted] = useState(false);
+  const [isShiftPressed, setIsShiftPressed] = useState(false);
   const [isListeningForPrompt, setIsListeningForPrompt] = useState(false);
 
   const handleSignOut = async () => {
@@ -238,41 +239,57 @@ const stopRecording = (isPrompt = false) => {
       if (event.code === 'Space' && !recording) {
         startRecording();
       }
+      if (event.key === 'Shift' && !isListeningForPrompt && !quizStarted) {
+        startListeningForPrompt();
+      }
     };
-
+  
     const handleKeyUp = (event) => {
       if (event.code === 'Space' && recording) {
         stopRecording();
+      }
+      if (event.key === 'Shift' && isListeningForPrompt && !quizStarted) {
+        stopListeningForPrompt();
       }
       if (event.code === 'Enter' && quizStarted && !showResults && isAnsweringComplete) {
         handleNextQuestion();
       }
     };
-
+  
     window.addEventListener('keydown', handleKeyDown);
     window.addEventListener('keyup', handleKeyUp);
-
+  
     return () => {
       window.removeEventListener('keydown', handleKeyDown);
       window.removeEventListener('keyup', handleKeyUp);
     };
-  }, [recording, quizStarted, showResults, isAnsweringComplete, handleNextQuestion]);
+  }, [recording, quizStarted, showResults, isAnsweringComplete, handleNextQuestion, isListeningForPrompt]);
 
   return (
-    <div>
-      <h1>Quiz Generator</h1>
+    <div className="quiz-container">
+          <h1
+        style={{
+          fontFamily: "'Comic Sans MS', cursive, sans-serif",
+          color: '#333',
+          fontSize: '2.5rem',
+          marginBottom: '20px',
+        }}
+      >
+        Qwizable😎
+      </h1>
       <button onClick={handleSignOut}>Sign Out</button>
       {!quizStarted && !showResults && (
-        <>
-          <button 
-            onClick={isListeningForPrompt ? stopListeningForPrompt : startListeningForPrompt}
-            disabled={loading}
-          >
-            {isListeningForPrompt ? 'Stop Recording' : 'Record Quiz Topic'}
-          </button>
-          {prompt && <p>Quiz topic: {prompt}</p>}
-        </>
-      )}
+  <>
+    <p>Hold Shift key to speak out quiz topic!</p>
+    <button 
+      disabled={true}
+      style={{ backgroundColor: isListeningForPrompt ? '#45a049' : '#4CAF50' }}
+    >
+      {isListeningForPrompt ? 'Recording...' : 'Press Shift to Record'}
+    </button>
+    {prompt && <p>Quiz topic: {prompt}</p>}
+  </>
+)}
       {quiz && quizStarted && currentQuestionIndex < quiz.length && (
         <Quiz
           question={quiz[currentQuestionIndex]}

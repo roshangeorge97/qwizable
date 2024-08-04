@@ -56,7 +56,7 @@ const QuizResult = ({ questions, userAnswers, speakText, onRestart }) => {
   }, [score, questions.length, speakText]);
 
   return (
-    <div>
+    <div className="result-container">
       <h2>Quiz Results</h2>
       <p>You scored {score} out of {questions.length}</p>
       {leaderboardPosition && (
