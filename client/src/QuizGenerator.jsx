@@ -2,6 +2,9 @@ import React, { useState, useRef, useEffect, useCallback } from 'react';
 import OpenAI from "openai";
 import Quiz from './Quiz';
 import QuizResult from './QuizResult';
+import { signOut } from 'firebase/auth';
+import { auth } from './firebase';
+
 
 const QuizGenerator = () => {
   const [prompt, setPrompt] = useState('');
@@ -19,6 +22,14 @@ const QuizGenerator = () => {
   const [showResults, setShowResults] = useState(false);
   const [quizSubmitted, setQuizSubmitted] = useState(false);
   const [isListeningForPrompt, setIsListeningForPrompt] = useState(false);
+
+  const handleSignOut = async () => {
+    try {
+      await signOut(auth);
+    } catch (error) {
+      console.error('Error signing out:', error);
+    }
+  };
 
   const startListeningForPrompt = async () => {
     setIsListeningForPrompt(true);
@@ -250,6 +261,7 @@ const stopRecording = (isPrompt = false) => {
   return (
     <div>
       <h1>Quiz Generator</h1>
+      <button onClick={handleSignOut}>Sign Out</button>
       {!quizStarted && !showResults && (
         <>
           <button 
