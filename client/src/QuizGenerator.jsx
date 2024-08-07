@@ -269,7 +269,7 @@ const stopRecording = (isPrompt = false) => {
   <>
     <button  className='quiz-butt'
       disabled={true}
-      style={{ backgroundColor: isListeningForPrompt ? '#45a049' : '#4CAF50' }}
+      style={{ backgroundColor: isListeningForPrompt ? '#1C3738' : '#1C3738' }}
     >
       {isListeningForPrompt ? 'Recording...' : 'Press Shift to Record your Topic'}
     </button>

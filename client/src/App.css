@@ -5,7 +5,7 @@ body {
   color: #000; /* Dark text */
   font-size: 16px;
   line-height: 1.6;
-  background-color: #ffffff; /* White background */
+  background-color: #D7F171; /* White background */
 }
 
 #root {
@@ -27,9 +27,13 @@ header {
   justify-content: space-between;
   align-items: center;
   padding: 10px 20px;
-  background-color: #000000; /* Black header */
-  color: #ffffff; /* White text */
+  background-color: #1098F7; /* Yellow header */
+  color: #D7F171; /* Black text */
+  font-family: 'Rubik', sans-serif;
+  border-radius: 10px;
 }
+
+
 
 h1 {
   margin: 0;
@@ -246,3 +250,66 @@ input[type="text"], input[type="email"], input[type="password"] {
     color: #000000;
   }
 }
+
+/* src/components/Auth.css */
+.auth-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: #f0f0f0;
+  font-family: 'Arial', sans-serif;
+  margin:auto;
+}
+
+.auth-box {
+  background-color: white;
+  padding: 40px;
+  border-radius: 10px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  text-align: center;
+  max-width: 400px;
+  width: 100%;
+}
+
+.auth-container h1 {
+  color: #333;
+  margin-bottom: 10px;
+}
+
+.auth-container p {
+  color: #666;
+  margin-bottom: 30px;
+}
+
+.auth-button {
+  display: block;
+  width: 100%;
+  padding: 10px;
+  margin: 10px 0;
+  border: none;
+  border-radius: 5px;
+  font-size: 16px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.google-sign-in {
+  background-color: #4285F4;
+  color: white;
+}
+
+.google-sign-in:hover {
+  background-color: #357ae8;
+}
+
+.sign-out {
+  background-color: #f44336;
+  color: white;
+}
+
+.sign-out:hover {
+  background-color: #d32f2f;
+}
+
+/* Add Font Awesome for icons */
+@import url('https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css');
