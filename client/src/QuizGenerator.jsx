@@ -205,17 +205,15 @@ const stopRecording = (isPrompt = false) => {
       }
     }
   };
-
   const handleNextQuestion = useCallback(() => {
-    console.log('Moving to next question');
     if (isAnsweringComplete && quiz && currentQuestionIndex < quiz.length - 1) {
       setCurrentQuestionIndex(prevIndex => prevIndex + 1);
-      setIsAnsweringComplete(false); // Reset answering complete status for the next question
-    } else if (isAnsweringComplete && !quizSubmitted) {
-      setQuizSubmitted(true);
+      setIsAnsweringComplete(false);
+    } else if (isAnsweringComplete) {
+      setQuizStarted(false);
       setShowResults(true);
     }
-  }, [quiz, currentQuestionIndex, quizSubmitted, isAnsweringComplete]);
+  }, [quiz, currentQuestionIndex, isAnsweringComplete]);
 
   // Reset function
   const resetQuiz = useCallback(() => {
@@ -267,30 +265,18 @@ const stopRecording = (isPrompt = false) => {
 
   return (
     <div className="quiz-container">
-          <h1
-        style={{
-          fontFamily: "'Comic Sans MS', cursive, sans-serif",
-          color: '#333',
-          fontSize: '2.5rem',
-          marginBottom: '20px',
-        }}
-      >
-        Qwizable😎
-      </h1>
-      <button onClick={handleSignOut}>Sign Out</button>
       {!quizStarted && !showResults && (
   <>
-    <p>Hold Shift key to speak out quiz topic!</p>
-    <button 
+    <button  className='quiz-butt'
       disabled={true}
       style={{ backgroundColor: isListeningForPrompt ? '#45a049' : '#4CAF50' }}
     >
-      {isListeningForPrompt ? 'Recording...' : 'Press Shift to Record'}
+      {isListeningForPrompt ? 'Recording...' : 'Press Shift to Record your Topic'}
     </button>
     {prompt && <p>Quiz topic: {prompt}</p>}
   </>
 )}
-      {quiz && quizStarted && currentQuestionIndex < quiz.length && (
+           {quiz && quizStarted && !showResults && (
         <Quiz
           question={quiz[currentQuestionIndex]}
           questionIndex={currentQuestionIndex}

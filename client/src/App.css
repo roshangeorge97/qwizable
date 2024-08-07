@@ -1,169 +1,248 @@
 body {
   margin: 0;
   padding: 0;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  min-height: 100vh;
-  background-color: #f0f0f0;
   font-family: Arial, sans-serif;
-  color: #000000;
-  font-size: 18px; /* Decreased base font size */
+  color: #000; /* Dark text */
+  font-size: 16px;
   line-height: 1.6;
+  background-color: #ffffff; /* White background */
 }
 
 #root {
   width: 100%;
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 2rem;
-  box-sizing: border-box;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
 }
 
 .App {
-  background-color: white;
-  border-radius: 16px;
-  padding: 3rem;
-  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
-  text-align: center;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  padding: 20px;
 }
 
-h1, h2 {
-  color: #000000;
-  margin-bottom: 1.5rem; /* Decreased margin */
-  font-size: 2.5rem; /* Smaller heading size */
+header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 20px;
+  background-color: #000000; /* Black header */
+  color: #ffffff; /* White text */
+}
+
+h1 {
+  margin: 0;
+  font-size: 2rem;
+}
+
+nav {
+  display: flex;
+  gap: 10px;
 }
 
 button {
-  background-color: #4CAF50;
-  border: none;
-  color: white;
-  padding: 16px 32px; /* Decreased padding */
+  background-color: #000000; /* Black buttons */
+  border: 2px solid #ffffff; /* White border */
+  color: #ffffff; /* White text */
+  padding: 10px 20px;
   text-align: center;
   text-decoration: none;
   display: inline-block;
-  font-size: 20px; /* Smaller font size */
-  margin: 10px 5px; /* Decreased margin */
+  font-size: 16px;
   cursor: pointer;
-  border-radius: 8px; /* Less rounded corners */
-  transition: background-color 0.3s, transform 0.2s;
-  min-width: 150px; /* Decreased minimum width */
+  border-radius: 4px;
+  transition: background-color 0.3s;
 }
 
 button:hover {
-  background-color: #45a049;
-  transform: scale(1.05);
+  background-color: #333333; /* Darker black on hover */
 }
 
-button:focus {
-  outline: 4px solid #45a049;
-  outline-offset: 4px;
+.content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
 }
 
-button:disabled {
-  background-color: #cccccc;
-  cursor: not-allowed;
+.mic-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-bottom: 20px;
 }
 
-ul {
-  list-style-type: none;
-  padding: 0;
-}
-
-li {
-  margin-bottom: 20px; /* Decreased margin for list items */
-  font-size: 20px; /* Smaller font size for list items */
+.mic-image {
+  width: 100px;
+  height: 100px;
+  background-image: url('C:/Users/ROSHAN GEORGE/QwizAble/client/src/assets/microphone-black-shape.png');
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-position: center;
 }
 
 .quiz-container, .result-container, .leaderboard-container {
-  background-color: #f9f9f9;
-  border-radius: 16px;
-  padding: 30px; /* Decreased padding */
-  margin-top: 30px; /* Decreased margin */
-  box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+  background-color: #ffffff; /* White background */
+  color: #000000; /* Black text */
+  border-radius: 14px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  width: 100%;
+  max-width: 800px; /* Increase the width */
+  display: flex;
+  justify-content: space-between; /* Align items to the sides */
+  padding: 20px;
 }
 
-.nav-buttons {
-  margin-bottom: 30px; /* Decreased margin */
+.quiz-butt{
+  font-size: 32px;
+  height: 10em;
+  width: 100%;
 }
 
-.nav-buttons button {
-  margin: 0 10px; /* Decreased margin between nav buttons */
+.quiz-content {
+  flex: 1;
+  padding-right: 20px; /* Add some space between content and buttons */
 }
 
-.question-text {
-  font-weight: bold;
-  margin-bottom: 20px; /* Decreased margin */
-  font-size: 24px; /* Smaller font size for questions */
+.quiz-buttons {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
 }
 
 .options-list {
   text-align: left;
-  margin: 0 auto;
-  width: fit-content;
-}
-
-.result-item {
-  margin-bottom: 30px; /* Decreased margin */
-  border-bottom: 2px solid #eee;
-  padding-bottom: 20px; /* Decreased padding */
-}
-
-.leaderboard-list {
-  text-align: left;
-  margin: 0 auto;
-  width: fit-content;
-}
-
-.leaderboard-item {
-  margin-bottom: 15px; /* Decreased margin */
-  font-size: 20px; /* Smaller font size for leaderboard items */
-}
-
-p {
-  font-size: 20px; /* Smaller font size for paragraphs */
-  line-height: 1.6;
-  margin-bottom: 20px; /* Decreased margin */
+  padding-left: 20px;
 }
 
 input[type="text"], input[type="email"], input[type="password"] {
-  font-size: 20px; /* Smaller font size for input fields */
-  padding: 15px; /* Decreased padding */
-  margin-bottom: 20px; /* Decreased margin */
+  font-size: 16px;
+  padding: 10px;
+  margin-bottom: 10px;
   width: 100%;
-  max-width: 500px;
-  border: 2px solid #ccc; /* Thinner border */
-  border-radius: 8px;
+  border: 2px solid #000000; /* Black border */
+  border-radius: 4px;
+  background-color: #ffffff; /* White background */
+  color: #000000; /* Black text */
 }
 
-/* High contrast mode */
 @media (prefers-contrast: high) {
   body {
-    background-color: #000000;
-    color: #ffffff;
+    background-color: #000000; /* Black background */
+    color: #ffffff; /* White text */
   }
   
-  .App, .quiz-container.quiz-container, .result-container, .leaderboard-container {
+  .App, .quiz-container, .result-container, .leaderboard-container {
+    background-color: #000000; /* Black background */
+    color: #ffffff; /* White text */
+    border: 2px solid #ffffff; /* White border */
+  }
+  
+  button {
+    background-color: #ffffff; /* White background */
+    color: #000000; /* Black text */
+  }
+  
+  input[type="text"], input[type="email"], input[type="password"] {
+    background-color: #000000; /* Black background */
+    color: #ffffff; /* White text */
+    border-color: #ffffff; /* White border */
+  }
+}
+
+
+.result-container {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 20px;
+  padding: 20px;
+  background-color: #ffffff;
+  border-radius: 14px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+.result-summary {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  padding-bottom: 20px;
+  border-bottom: 1px solid #e0e0e0;
+}
+
+.result-summary h2 {
+  font-size: 24px;
+  margin-bottom: 10px;
+}
+
+.score, .leaderboard-position {
+  font-size: 18px;
+  margin: 5px 0;
+}
+
+.restart-button {
+  margin-top: 15px;
+  padding: 10px 20px;
+  font-size: 16px;
+  background-color: #000000;
+  color: #ffffff;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.questions-review {
+  display: flex;
+  flex-direction: row;
+  overflow-x: auto;
+  gap: 10px;
+  padding-bottom: 10px;
+}
+
+.question-review {
+  flex: 0 0 auto;
+  width: 200px;
+  background-color: #f9f9f9;
+  border-radius: 8px;
+  padding: 10px;
+  font-size: 12px;
+}
+
+.question-text, .user-answer, .correct-answer {
+  margin: 5px 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+@media (max-width: 600px) {
+  .questions-review {
+    flex-direction: column;
+  }
+  .question-review {
+    width: 100%;
+  }
+}
+
+@media (prefers-contrast: high) {
+  .result-container {
     background-color: #000000;
     color: #ffffff;
     border: 2px solid #ffffff;
   }
 
-  
-  
-  button {
+  .question-review {
+    background-color: #333333;
+  }
+
+  .restart-button {
     background-color: #ffffff;
     color: #000000;
-    border: 2px solid #000000;
-  }
-  
-  button:hover {
-    background-color: #cccccc;
-  }
-  
-  input[type="text"], input[type="email"], input[type="password"] {
-    background-color: #000000;
-    color: #ffffff;
-    border-color: #ffffff;
   }
 }

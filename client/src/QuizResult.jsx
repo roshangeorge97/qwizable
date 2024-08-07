@@ -46,39 +46,59 @@ const QuizResult = ({ questions, userAnswers, speakText, onRestart }) => {
     
         // Speak the result
         const resultText = `You have scored ${score} out of ${questions.length}. 
-                            You are at position ${userPosition + 1} on the leaderboard.
-                            ${positionMessage}`;
+        You are at position ${userPosition + 1} on the leaderboard.
+        ${positionMessage}
+        Press enter to restart the quiz.`;
         await speakText(resultText);
       }
     };
 
     saveScoreAndUpdateLeaderboard();
-  }, [score, questions.length, speakText]);
 
-  return (
-    <div className="result-container">
-      <h2>Quiz Results</h2>
-      <p>You scored {score} out of {questions.length}</p>
-      {leaderboardPosition && (
-        <p>You are at position {leaderboardPosition} on the leaderboard.</p>
-      )}
-      {pointsToNextPosition !== null && (
-        <p>You need {pointsToNextPosition} more points to claim the {leaderboardPosition - 1}th position.</p>
-      )}
-      {questions.map((question, index) => (
-        <div key={index}>
-          <p><strong>Question:</strong> {question.question}</p>
-          <p><strong>Your answer:</strong> {
-            userAnswers[index] !== undefined && userAnswers[index] !== null
-              ? question.options[userAnswers[index]]
-              : 'No answer provided'
-          }</p>
-          <p><strong>Correct answer:</strong> {question.options[question.correctAnswer]}</p>
+        // Add event listener for Enter key
+        const handleKeyPress = (event) => {
+          if (event.key === 'Enter') {
+            onRestart();
+          }
+        };
+    
+        window.addEventListener('keypress', handleKeyPress);
+    
+        // Clean up event listener
+        return () => {
+          window.removeEventListener('keypress', handleKeyPress);
+        };
+      }, [score, questions.length, speakText, onRestart]);
+
+      return (
+        <div className="result-container">
+          <div className="result-summary">
+            <h2>Quiz Results</h2>
+            <p className="score">Score: {score} / {questions.length}</p>
+            {leaderboardPosition && (
+              <p className="leaderboard-position">Leaderboard Position: {leaderboardPosition}</p>
+            )}
+            <button onClick={onRestart} className="restart-button">Restart Quiz</button>
+          </div>
+          <div className="questions-review">
+            {questions.map((question, index) => (
+              <div key={index} className="question-review">
+                <p className="question-text"><strong>Q{index + 1}:</strong> {question.question.substring(0, 30)}...</p>
+                <p className="user-answer">
+                  Your: {
+                    userAnswers[index] !== undefined && userAnswers[index] !== null
+                      ? question.options[userAnswers[index]].substring(0, 20)
+                      : 'No answer'
+                  }...
+                </p>
+                <p className="correct-answer">
+                  Correct: {question.options[question.correctAnswer].substring(0, 20)}...
+                </p>
+              </div>
+            ))}
+          </div>
         </div>
-      ))}
-      <button onClick={onRestart}>Restart Quiz</button>
-    </div>
-  );
-};
-
-export default QuizResult;
+      );
+    };
+    
+    export default QuizResult;
